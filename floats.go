@@ -326,7 +326,7 @@ func EqualWithinULP(a, b float64, ulp uint) bool {
 
 func ulpDiff(a, b uint64) uint64 {
 	if a > b {
-		a, b = b, a
+		return a - b
 	}
 	return b - a
 }
