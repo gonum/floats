@@ -2,10 +2,9 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
-// package floats provides a set of helper routines for dealing with slices
+// Package floats provides a set of helper routines for dealing with slices
 // of float64. The functions avoid allocations to allow for use within tight
 // loops without garbage collection overhead.
-
 package floats
 
 import (
@@ -18,10 +17,10 @@ import (
 // results stored in the first slice.
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
-// in doubt, EqLen can be used.
-func Add(dst []float64, slices ...[]float64) []float64 {
+// in doubt, EqualLengths can be used.
+func Add(dst []float64, slices ...[]float64) {
 	if len(slices) == 0 {
-		return nil
+		return
 	}
 	if len(dst) != len(slices[0]) {
 		panic("floats: length of destination does not match length of the slices")
@@ -31,13 +30,13 @@ func Add(dst []float64, slices ...[]float64) []float64 {
 			dst[j] += val
 		}
 	}
-	return dst
+	return
 }
 
-// AddConst adds the value c to all of the values in s.
-func AddConst(c float64, s []float64) {
-	for i := range s {
-		s[i] += c
+// AddConst adds the scalar c to all of the values in dst.
+func AddConst(c float64, dst []float64) {
+	for i := range dst {
+		dst[i] += c
 	}
 }
 
@@ -54,16 +53,26 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 
 // AddScaledTo performs dst = y + alpha * s.
 // It panics if the lengths of dst, y, and s are not equal.
-func AddScaledTo(dst []float64, y []float64, alpha float64, s []float64) []float64 {
+func AddScaledTo(dst, y []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
 	}
 	for i, val := range s {
 		dst[i] = y[i] + alpha*val
 	}
-	return dst
+	return
 }
 
+// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
+// of the slice dst.
+func Apply(f func(float64) float64, dst []float64) {
+	for i, val := range dst {
+		dst[i] = f(val)
+	}
+}
+
+// argsort implements the Sort.Interface interface to help the
+// Argsort function.
 type argsort struct {
 	s    []float64
 	inds []int
@@ -80,14 +89,6 @@ func (a argsort) Less(i, j int) bool {
 func (a argsort) Swap(i, j int) {
 	a.s[i], a.s[j] = a.s[j], a.s[i]
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
-}
-
-// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
-// of the slice s.
-func Apply(f func(float64) float64, s []float64) {
-	for i, val := range s {
-		s[i] = f(val)
-	}
 }
 
 // Argsort sorts the elements of s while tracking their original order.
@@ -121,33 +122,41 @@ func Count(f func(float64) bool, s []float64) int {
 // CumProd finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. A panic will occur if lengths of do not match.
-func CumProd(dst, s []float64) []float64 {
+func CumProd(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
+	}
+	if len(dst) == 0 {
+		return
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]
 	}
-	return dst
+	return
 }
 
 // CumSum finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
-// destination. A panic will occur if lengths of arguments do not match.
-func CumSum(dst, s []float64) []float64 {
+// destination dst. A panic will occur if lengths of arguments 
+// do not match.
+func CumSum(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
+	}
+	if len(dst) == 0 {
+		return
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] + s[i]
 	}
-	return dst
+	return
 }
 
-// Dist computes the L-norm of s - t. See Norm for special cases.
-func Distance(s []float64, t []float64, L float64) float64 {
+// Distance computes the L-norm of s - t. See Norm for special cases.
+// A panic will occur if the lengths of s and t do not match.
+func Distance(s, t []float64, L float64) float64 {
 	if len(s) != len(t) {
 		panic("floats: slice lengths do not match")
 	}
@@ -183,34 +192,34 @@ func Distance(s []float64, t []float64, L float64) float64 {
 	return math.Pow(norm, 1/L)
 }
 
-// Div performs element-wise division between s
-// and t and stores the value in s. It panics if the
-// lengths of s and t are not equal.
-func Div(s []float64, t []float64) {
-	if len(s) != len(t) {
+// Div performs element-wise division between dst
+// and s and stores the value in dst. It panics if the
+// lengths of dst and s are not equal.
+func Div(dst, s []float64) {
+	if len(dst) != len(s) {
 		panic("floats: slice lengths do not match")
 	}
-	for i, val := range t {
-		s[i] /= val
+	for i, val := range s {
+		dst[i] /= val
 	}
 }
 
 // DivTo performs element-wise division between s
 // and t and stores the value in dst. It panics if the
 // lengths of s, t, and dst are not equal.
-func DivTo(dst []float64, s []float64, t []float64) []float64 {
+func DivTo(dst, s, t []float64) {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
 	}
 	for i, val := range t {
 		dst[i] = s[i] / val
 	}
-	return dst
+	return
 }
 
 // Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N s1[i]*s2[i].
-// A panic will occur if lengths of arguments do not match.
+// A panic will occur if lengths of s1 and s2 do not match.
 func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
 		panic("floats: lengths of the slices do not match")
@@ -317,7 +326,7 @@ func EqualWithinULP(a, b float64, ulp uint) bool {
 
 func ulpDiff(a, b uint64) uint64 {
 	if a > b {
-		a, b = b, a
+		return a - b
 	}
 	return b - a
 }
@@ -338,11 +347,11 @@ func EqualLengths(slices ...[]float64) bool {
 	return true
 }
 
-// Fill loops over the elements of s and stores a value generated from f.
-// f is called n times, where n = len(s)
-func Fill(f func() float64, s []float64) {
-	for i := range s {
-		s[i] = f()
+// Fill loops over the elements of dst and stores a value generated from f.
+// f is called n times, where n = len(dst).
+func Fill(f func() float64, dst []float64) {
+	for i := range dst {
+		dst[i] = f()
 	}
 }
 
@@ -401,19 +410,19 @@ func HasNaN(s []float64) bool {
 	return false
 }
 
-// LogSpan returns a set of n equally spaced points in log space between,
+// LogSpan returns a set of N equally spaced points in log space between
 // l and u where N is equal to len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.
 // Panics if len(dst) < 2
 // Note that this call will return NaNs if either l or u are negative, and
 // will return all zeros if l or u is zero.
-func LogSpan(dst []float64, l, u float64) []float64 {
+func LogSpan(dst []float64, l, u float64) {
 	Span(dst, math.Log(l), math.Log(u))
 	Apply(math.Exp, dst)
-	return dst
+	return
 }
 
-// LogSumExp returns the log of the sum of the exponentials of the values in s
+// LogSumExp returns the log of the sum of the exponentials of the values in s.
 func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
@@ -460,39 +469,39 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
-// Mul performs element-wise multiplication between s
-// and t and stores the value in s. Panics if the
-// lengths of s and t are not equal.
-func Mul(s []float64, t []float64) {
-	if len(s) != len(t) {
+// Mul performs element-wise multiplication between dst
+// and s and stores the value in dst. Panics if the
+// lengths of dst and s are not equal.
+func Mul(dst, s []float64) {
+	if len(dst) != len(s) {
 		panic("floats: slice lengths do not match")
 	}
-	for i, val := range t {
-		s[i] *= val
+	for i, val := range s {
+		dst[i] *= val
 	}
 }
 
 // MulTo performs element-wise multiplication between s
 // and t and stores the value in dst. Panics if the
 // lengths of s, t, and dst are not equal.
-func MulTo(dst []float64, s []float64, t []float64) []float64 {
+func MulTo(dst, s, t []float64) {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
 	}
 	for i, val := range t {
 		dst[i] = val * s[i]
 	}
-	return dst
+	return
 }
 
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
+// Panics if len(s) == 0.
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
-	ind = 0
-	for i, val := range s {
-		newDist := math.Abs(v - val)
+	for i := 1; i < len(s); i++ {
+		newDist := math.Abs(v - s[i])
 		if newDist < dist {
 			dist = newDist
 			ind = i
@@ -511,7 +520,9 @@ func NearestWithinSpan(n int, l, u float64, v float64) int {
 	}
 
 	// Can't guarantee anything about exactly halfway between
-	// because of floating point weirdness
+	// because of floating point weirdness.
+	// See "Numerical Methods for Scientists and Engineers" by 
+	// Richard Hamming for a good introduction.
 	return int((float64(n)-1)/(u-l)*(v-l) + 0.5)
 }
 
@@ -553,18 +564,18 @@ func Norm(s []float64, L float64) (norm float64) {
 
 // Prod returns the product of the elements of the slice
 // Returns 1 if len(s) = 0.
-func Prod(s []float64) (prod float64) {
-	prod = 1
+func Prod(s []float64) float64 {
+	prod := 1.0
 	for _, val := range s {
 		prod *= val
 	}
 	return prod
 }
 
-// Scale multiplies every element in s by c.
-func Scale(c float64, s []float64) {
-	for i := range s {
-		s[i] *= c
+// Scale multiplies every element in dst by a scalar c.
+func Scale(c float64, dst []float64) {
+	for i := range dst {
+		dst[i] *= c
 	}
 }
 
@@ -572,7 +583,7 @@ func Scale(c float64, s []float64) {
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u.
 // Panics if len(dst) < 2.
-func Span(dst []float64, l, u float64) []float64 {
+func Span(dst []float64, l, u float64) {
 	n := len(dst)
 	if n < 2 {
 		panic("floats: destination must have length >1")
@@ -581,23 +592,23 @@ func Span(dst []float64, l, u float64) []float64 {
 	for i := range dst {
 		dst[i] = l + step*float64(i)
 	}
-	return dst
+	return
 }
 
 // Sub subtracts, element-wise, the second argument from the first. Panics if
-// the lengths of s and t do not match.
-func Sub(s, t []float64) {
-	if len(s) != len(t) {
+// the lengths of dst and s do not match.
+func Sub(dst, s []float64) {
+	if len(dst) != len(s) {
 		panic("floats: length of the slices do not match")
 	}
-	for i, val := range t {
-		s[i] -= val
+	for i, val := range s {
+		dst[i] -= val
 	}
 }
 
 // SubTo subtracts, element-wise, the third argument from the second and
-// stores the result in dst. Panics if the lengths of s and t do not match.
-func SubTo(dst, s, t []float64) []float64 {
+// stores the result in dst. Panics if the lengths of dst, s and t do not match.
+func SubTo(dst, s, t []float64) {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")
 	}
@@ -607,7 +618,7 @@ func SubTo(dst, s, t []float64) []float64 {
 	for i, val := range t {
 		dst[i] = s[i] - val
 	}
-	return dst
+	return
 }
 
 // Sum returns the sum of the elements of the slice.
