@@ -126,6 +126,9 @@ func CumProd(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
 	}
+	if len(dst) == 0 {
+		return
+	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]
@@ -140,6 +143,9 @@ func CumProd(dst, s []float64) {
 func CumSum(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
+	}
+	if len(dst) == 0 {
+		return
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
