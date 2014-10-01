@@ -5,7 +5,6 @@
 // package floats provides a set of helper routines for dealing with slices
 // of float64. The functions avoid allocations to allow for use within tight
 // loops without garbage collection overhead.
-
 package floats
 
 import (
@@ -18,7 +17,7 @@ import (
 // results stored in the first slice.
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
-// in doubt, EqLen can be used.
+// in doubt, EqualLengths can be used.
 func Add(dst []float64, slices ...[]float64) []float64 {
 	if len(slices) == 0 {
 		return nil
@@ -34,7 +33,7 @@ func Add(dst []float64, slices ...[]float64) []float64 {
 	return dst
 }
 
-// AddConst adds the value c to all of the values in s.
+// AddConst adds the scalar c to all of the values in s.
 func AddConst(c float64, s []float64) {
 	for i := range s {
 		s[i] += c
@@ -64,6 +63,16 @@ func AddScaledTo(dst []float64, y []float64, alpha float64, s []float64) []float
 	return dst
 }
 
+// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
+// of the slice s.
+func Apply(f func(float64) float64, s []float64) {
+	for i, val := range s {
+		s[i] = f(val)
+	}
+}
+
+// argsort implements the Sort.Interface interface to help the
+// Argsort function.
 type argsort struct {
 	s    []float64
 	inds []int
@@ -80,14 +89,6 @@ func (a argsort) Less(i, j int) bool {
 func (a argsort) Swap(i, j int) {
 	a.s[i], a.s[j] = a.s[j], a.s[i]
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
-}
-
-// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
-// of the slice s.
-func Apply(f func(float64) float64, s []float64) {
-	for i, val := range s {
-		s[i] = f(val)
-	}
 }
 
 // Argsort sorts the elements of s while tracking their original order.
@@ -146,7 +147,8 @@ func CumSum(dst, s []float64) []float64 {
 	return dst
 }
 
-// Dist computes the L-norm of s - t. See Norm for special cases.
+// Distance computes the L-norm of s - t. See Norm for special cases.
+// A panic will occur if the lengths of s and t do not match.
 func Distance(s []float64, t []float64, L float64) float64 {
 	if len(s) != len(t) {
 		panic("floats: slice lengths do not match")
@@ -210,7 +212,7 @@ func DivTo(dst []float64, s []float64, t []float64) []float64 {
 
 // Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N s1[i]*s2[i].
-// A panic will occur if lengths of arguments do not match.
+// A panic will occur if lengths of s1 and s2 do not match.
 func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
 		panic("floats: lengths of the slices do not match")
@@ -339,7 +341,7 @@ func EqualLengths(slices ...[]float64) bool {
 }
 
 // Fill loops over the elements of s and stores a value generated from f.
-// f is called n times, where n = len(s)
+// f is called n times, where n = len(s).
 func Fill(f func() float64, s []float64) {
 	for i := range s {
 		s[i] = f()
@@ -401,7 +403,7 @@ func HasNaN(s []float64) bool {
 	return false
 }
 
-// LogSpan returns a set of n equally spaced points in log space between,
+// LogSpan returns a set of N equally spaced points in log space between
 // l and u where N is equal to len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.
 // Panics if len(dst) < 2
@@ -413,7 +415,7 @@ func LogSpan(dst []float64, l, u float64) []float64 {
 	return dst
 }
 
-// LogSumExp returns the log of the sum of the exponentials of the values in s
+// LogSumExp returns the log of the sum of the exponentials of the values in s.
 func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
