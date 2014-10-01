@@ -572,7 +572,7 @@ func Prod(s []float64) float64 {
 	return prod
 }
 
-// Scale multiplies every element in dst by c.
+// Scale multiplies every element in dst by a scalar c.
 func Scale(c float64, dst []float64) {
 	for i := range dst {
 		dst[i] *= c
