@@ -497,6 +497,7 @@ func MulTo(dst, s, t []float64) {
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
+// Panics if len(s) == 0.
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
 	for i, val := range s {
