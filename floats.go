@@ -139,7 +139,7 @@ func CumProd(dst, s []float64) []float64 {
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
-		dst[i] = dst[i-1] * s[i]
+		dst[i] = dst[i-1] + s[i]
 	}
 	return dst
 }
