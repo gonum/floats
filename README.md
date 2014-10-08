@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jonlawlor/floats.svg)](https://travis-ci.org/jonlawlor/floats)
+
 # Gonum floats
 
 package floats provides a set of helper routines for dealing with slices of float64. The functions avoid allocations to allow for use within tight loops without garbage collection overhead.
