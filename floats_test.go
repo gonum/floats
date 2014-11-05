@@ -1090,7 +1090,7 @@ func TestFoldRight(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		got := FoldRight(test.s, test.accum, test.f)
+		got := FoldRight(test.f, test.s, test.accum)
 		if !EqualWithinAbs(got, test.expected, 1e-6) {
 			t.Errorf("FoldRight failed on test %d. Got %v expected %v", i, got, test.expected)
 		}
@@ -1110,7 +1110,7 @@ func TestFoldLeft(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		got := FoldLeft(test.s, test.accum, test.f)
+		got := FoldLeft(test.f, test.s, test.accum)
 		if !EqualWithinAbs(got, test.expected, 1e-6) {
 			t.Errorf("FoldLeft failed on test %d. Got %v expected %v", i, got, test.expected)
 		}

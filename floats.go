@@ -713,7 +713,7 @@ func Within(s []float64, v float64) int {
 // accum = f(curr, accum)
 //
 // At each step
-func FoldRight(s []float64, accum float64, f func(float64, float64) float64) float64 {
+func FoldRight(f func(float64, float64) float64, s []float64, accum float64) float64 {
 	for j := len(s) - 1; j >= 0; j-- {
 		accum = f(s[j], accum)
 	}
@@ -730,7 +730,7 @@ func FoldRight(s []float64, accum float64, f func(float64, float64) float64) flo
 // accum = f(accum, curr)
 //
 // At each step
-func FoldLeft(s []float64, accum float64, f func(float64, float64) float64) float64 {
+func FoldLeft(f func(float64, float64) float64, s []float64, accum float64) float64 {
 	for _, val := range s {
 		accum = f(accum, val)
 	}
