@@ -1132,7 +1132,7 @@ func TestApplyTo(t *testing.T) {
 		dst := make([]float64, len(test.s))
 		tmp := make([]float64, len(test.s))
 		copy(tmp, test.s)
-		ApplyTo(dst, test.s, test.f)
+		ApplyTo(dst, test.f, test.s)
 		if !EqualApprox(dst, test.expected, 1e-6) {
 			t.Errorf("ApplyTo failed on test %d. Got %v expected %v", i, dst, test.expected)
 		}
