@@ -1075,7 +1075,46 @@ func TestWithin(t *testing.T) {
 			t.Errorf("Case %v: Idx mismatch. Want: %v, got: %v", i, test.idx, idx)
 		}
 	}
+}
 
+func TestFoldRight(t *testing.T) {
+	tests := []struct {
+		s        []float64
+		f        func(float64, float64) float64
+		accum    float64
+		expected float64
+	}{
+		{s: []float64{1, 2, 3, 4}, f: func(a, b float64) float64 { return a - b }, accum: 3, expected: 1},
+		{s: []float64{1, 2, 3, 4}, f: func(a, b float64) float64 { return a + b }, accum: 100, expected: 110},
+		{s: []float64{1, 2, 3, 4}, f: func(a, b float64) float64 { return (a * b) / 2 }, accum: 6, expected: 9},
+	}
+
+	for i, test := range tests {
+		got := FoldRight(test.s, test.accum, test.f)
+		if !EqualWithinAbs(got, test.expected, 1e-6) {
+			t.Errorf("FoldRight failed on test %d. Got %v expected %v", i, got, test.expected)
+		}
+	}
+}
+
+func TestFoldLeft(t *testing.T) {
+	tests := []struct {
+		s        []float64
+		f        func(float64, float64) float64
+		accum    float64
+		expected float64
+	}{
+		{s: []float64{1, 2, 3, 4}, f: func(a, b float64) float64 { return a - b }, accum: 3, expected: -7},
+		{s: []float64{1, 2, 3, 4}, f: func(a, b float64) float64 { return a + b }, accum: 100, expected: 110},
+		{s: []float64{1, 2, 3, 4}, f: func(a, b float64) float64 { return (a * b) / 2 }, accum: 6, expected: 9},
+	}
+
+	for i, test := range tests {
+		got := FoldLeft(test.s, test.accum, test.f)
+		if !EqualWithinAbs(got, test.expected, 1e-6) {
+			t.Errorf("FoldLeft failed on test %d. Got %v expected %v", i, got, test.expected)
+		}
+	}
 }
 
 func RandomSlice(l int) []float64 {
