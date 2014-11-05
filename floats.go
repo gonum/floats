@@ -729,3 +729,59 @@ func FoldLeft(s []float64, accum float64, f func(float64, float64) float64) floa
 
 	return accum
 }
+
+// Applies a function to every element of s and places the first k elements where
+// that function returns true in an output slice.
+//
+// If k < 0, this will return all elements that return true.
+// If k > 0, and fewer elements pass the test, this will return an error.
+//
+// Useful for, for instance, filtering all the strictly negative numbers out of a slice.
+func Filter(f func(float64) bool, s []float64, k int) ([]float64, error) {
+	out := make([]float64, 0, len(s))
+	return FilterTo(out, f, s, k)
+}
+
+// Applies a function to every element of s and places the first k elements
+// where that function returns true in dst.
+//
+// If k < 0, this will slice dst to 0 and append all
+// elements that return true. If k > 0, and fewer elements pass the test,
+// this will return an error.
+//
+// Useful for, for instance, filtering all the strictly negative numbers out of a slice.
+//
+// This is the same as Find, but it returns the actual elements instead of the indices
+func FilterTo(dst []float64, f func(float64) bool, s []float64, k int) ([]float64, error) {
+	if k == 0 {
+		return dst[:0], nil
+	}
+
+	var err error
+	dst = dst[:0]
+
+	if k < 0 {
+		for _, val := range s {
+			if f(val) {
+				dst = append(dst, val)
+			}
+		}
+	} else {
+		found := 0
+		for _, val := range s {
+			if found >= k {
+				break
+			}
+			if f(val) {
+				dst = append(dst, val)
+				found++
+			}
+		}
+
+		if found < k {
+			err = errors.New("floats: insufficient elements found")
+		}
+	}
+
+	return dst, err
+}

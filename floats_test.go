@@ -1144,6 +1144,42 @@ func TestApplyTo(t *testing.T) {
 	}
 }
 
+func TestFilterTo(t *testing.T) {
+	tests := []struct {
+		s           []float64
+		f           func(float64) bool
+		k           int
+		expected    []float64
+		expectedErr bool
+	}{
+		{s: []float64{1, 2, 3, 4}, f: func(a float64) bool { return a < 2.5 }, k: -1, expected: []float64{1, 2}, expectedErr: false},
+		{s: []float64{1, 2, 3, 4}, f: func(a float64) bool { return a < 2.5 }, k: 0, expected: []float64{}, expectedErr: false},
+		{s: []float64{1, 2, 3, 4}, f: func(a float64) bool { return a < 2.5 }, k: 1, expected: []float64{1}, expectedErr: false},
+		{s: []float64{.5, 2, .22, 4}, f: func(a float64) bool { return a*a <= a }, k: 3, expected: []float64{.5, .22}, expectedErr: true},
+		{s: []float64{.5, 2, .22, 4}, f: func(a float64) bool { return a*a <= a }, k: 2, expected: []float64{.5, .22}, expectedErr: false},
+		{s: []float64{1, 2, 3, -5, .237, 99}, f: func(a float64) bool { return false }, k: -1, expected: []float64{}},
+	}
+
+	for i, test := range tests {
+		var err error
+		dst := make([]float64, len(test.s))
+		tmp := make([]float64, len(test.s))
+		copy(tmp, test.s)
+		dst, err = FilterTo(dst, test.f, test.s, test.k)
+		if !EqualApprox(dst, test.expected, 1e-6) {
+			t.Errorf("Filter failed on test %d. Got %v expected %v", i, dst, test.expected)
+		}
+		if (err != nil) != test.expectedErr {
+			t.Errorf("Filter failed on test %d. Expected no error, but got one with k=%d", i, test.k)
+		}
+
+		// Check to make sure input slice not mutated
+		if !EqualApprox(tmp, test.s, 0) {
+			t.Error("Non-dst Input slice mutated in Filter")
+		}
+	}
+}
+
 func RandomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {
