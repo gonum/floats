@@ -110,7 +110,7 @@ func ExampleFilter_simple() {
 		return a > 3
 	}
 
-	dst, _ := Filter(f, s, -1)
+	dst, _ := FilterTo(nil, f, s, -1)
 
 	fmt.Println("dst =", dst)
 	fmt.Println("s =", s)
@@ -155,7 +155,7 @@ func ExampleFoldRight() {
 	}
 	initial := 5.0
 
-	val := FoldRight(f, s, initial)
+	val := FoldRight(nil, f, s, initial)
 
 	fmt.Println("val =", val)
 	fmt.Println("initial =", initial)

@@ -42,8 +42,8 @@ func AddTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
-// AddConst adds the value c to all of the values in s.
-func AddConst(c float64, s []float64) {
+// AddConst adds the value c to all of the values in dst.
+func AddConst(c float64, dst []float64) {
 	for i := range s {
 		s[i] += c
 	}
@@ -93,29 +93,6 @@ func (a argsort) Less(i, j int) bool {
 func (a argsort) Swap(i, j int) {
 	a.s[i], a.s[j] = a.s[j], a.s[i]
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
-}
-
-// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
-// of the slice s.
-func Apply(f func(float64) float64, s []float64) {
-	for i, val := range s {
-		s[i] = f(val)
-	}
-}
-
-// Applies a function to every element of s and stores the result in dst. If dst and s are
-// not the same size, this will panic
-//
-// This is similar to Apply, but places the result in another slice
-func ApplyTo(dst []float64, f func(float64) float64, s []float64) []float64 {
-	if len(dst) != len(s) {
-		panic("floats: length of destination does not match length of map recipient")
-	}
-	for i, val := range s {
-		dst[i] = f(val)
-	}
-
-	return dst
 }
 
 // Argsort sorts the elements of s while tracking their original order.
@@ -704,7 +681,7 @@ func Within(s []float64, v float64) int {
 	return -1
 }
 
-// Folds a function from the right into a single value by iteratively applying a function on an
+// FoldsRight folds a function from the right into a single value by iteratively applying a function on an
 // accumulated value.
 //
 // Accum is the initial accumulator value.
@@ -720,7 +697,7 @@ func FoldRight(f func(float64, float64) float64, s []float64, accum float64) flo
 	return accum
 }
 
-// Folds a function from the left into a single value by iteratively applying a function on an
+// FoldLeft folds a function from the left into a single value by iteratively applying a function on an
 // accumulated value.
 //
 // Accum is the initial accumulator value.
@@ -742,19 +719,7 @@ func FoldLeft(f func(float64, float64) float64, s []float64, accum float64) floa
 	return accum
 }
 
-// Applies a function to every element of s and places the first k elements where
-// that function returns true in an output slice.
-//
-// If k < 0, this will return all elements that return true.
-// If k > 0, and fewer elements pass the test, this will return an error.
-//
-// Useful for, for instance, filtering all the strictly negative numbers out of a slice.
-func Filter(f func(float64) bool, s []float64, k int) ([]float64, error) {
-	out := make([]float64, 0, len(s))
-	return FilterTo(out, f, s, k)
-}
-
-// Applies a function to every element of s and places the first k elements
+// FilterTo applies a function to every element of s and places the first k elements
 // where that function returns true in dst.
 //
 // If k < 0, this will slice dst to 0 and append all
@@ -770,7 +735,12 @@ func FilterTo(dst []float64, f func(float64) bool, s []float64, k int) ([]float6
 	}
 
 	var err error
-	dst = dst[:0]
+	// If dst is nil append still works,
+	// it just makes a new slice, but we can't
+	// downslice
+	if dst != nil {
+		dst = dst[:0]
+	}
 
 	if k < 0 {
 		for _, val := range s {
