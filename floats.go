@@ -44,8 +44,8 @@ func AddTo(dst, s, t []float64) []float64 {
 
 // AddConst adds the value c to all of the values in dst.
 func AddConst(c float64, dst []float64) {
-	for i := range s {
-		s[i] += c
+	for i := range dst {
+		dst[i] += c
 	}
 }
 

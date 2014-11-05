@@ -119,7 +119,7 @@ func ExampleFilter_simple() {
 	// s = [1 3 2 5 6]
 }
 
-func ExampleFilter_susequence() {
+func ExampleFilter_subsequence() {
 	// Let's use state magic to filter elements
 	// so the resulting list is a strictly increasing
 	// subsequence!
@@ -135,7 +135,7 @@ func ExampleFilter_susequence() {
 		return false
 	}
 
-	dst, _ := Filter(f, s, -1)
+	dst, _ := FilterTo(nil, f, s, -1)
 
 	fmt.Println("dst =", dst)
 	fmt.Println("s =", s)
@@ -155,7 +155,7 @@ func ExampleFoldRight() {
 	}
 	initial := 5.0
 
-	val := FoldRight(nil, f, s, initial)
+	val := FoldRight(f, s, initial)
 
 	fmt.Println("val =", val)
 	fmt.Println("initial =", initial)
