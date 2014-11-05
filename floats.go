@@ -710,9 +710,8 @@ func Within(s []float64, v float64) int {
 // Accum is the initial accumulator value.
 //
 // This is equivalent to iterating over the list from the right and doing
-// accum = f(curr, accum)
-//
-// At each step
+//     accum = f(curr, accum)
+// at each step.
 func FoldRight(f func(float64, float64) float64, s []float64, accum float64) float64 {
 	for j := len(s) - 1; j >= 0; j-- {
 		accum = f(s[j], accum)
@@ -727,9 +726,14 @@ func FoldRight(f func(float64, float64) float64, s []float64, accum float64) flo
 // Accum is the initial accumulator value.
 //
 // This is equivalent to iterating over the list from the start and doing
-// accum = f(accum, curr)
+//     accum = f(accum, curr)
+// at each step.
 //
-// At each step
+// For instance, the last element of CumProd could be found with:
+//     FoldLeft(func(a,b float64) float64{ return a * b}, s, 1.0)
+//
+// Or the last element of CumSum:
+//     FoldLeft(func(a,b float64) float64{ return a + b}, s, 0.0)
 func FoldLeft(f func(float64, float64) float64, s []float64, accum float64) float64 {
 	for _, val := range s {
 		accum = f(accum, val)
