@@ -42,10 +42,25 @@ func AddTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
-// AddConst adds the scalar c to all of the values in dst.
-func AddConst(c float64, dst []float64) {
-	for i := range dst {
-		dst[i] += c
+// Applies a function to every element of s and stores the result in dst. If dst and s are
+// not the same size, this will panic
+//
+// This is similar to Apply, but places the result in another slice
+func ApplyTo(dst, s []float64, f func(float64) float64) []float64 {
+	if len(dst) != len(s) {
+		panic("floats: length of destination does not match length of map recipient")
+	}
+	for i, val := range s {
+		dst[i] = f(val)
+	}
+
+	return dst
+}
+
+// AddConst adds the value c to all of the values in s.
+func AddConst(c float64, s []float64) {
+	for i := range s {
+		s[i] += c
 	}
 }
 
@@ -681,7 +696,9 @@ func Within(s []float64, v float64) int {
 	return -1
 }
 
-// Folds a function from the right into a single value by iteratively applying a function on an accumulated value.
+// Folds a function from the right into a single value by iteratively applying a function on an
+// accumulated value.
+//
 // Accum is the initial accumulator value.
 //
 // This is equivalent to iterating over the list from the right and doing
@@ -696,7 +713,9 @@ func FoldRight(s []float64, accum float64, f func(float64, float64) float64) flo
 	return accum
 }
 
-// Folds a function from the left into a single value by iteratively applying a function on an accumulated value.
+// Folds a function from the left into a single value by iteratively applying a function on an
+// accumulated value.
+//
 // Accum is the initial accumulator value.
 //
 // This is equivalent to iterating over the list from the start and doing

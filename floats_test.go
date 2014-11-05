@@ -1117,6 +1117,33 @@ func TestFoldLeft(t *testing.T) {
 	}
 }
 
+func TestApplyTo(t *testing.T) {
+	tests := []struct {
+		s        []float64
+		f        func(float64) float64
+		expected []float64
+	}{
+		{s: []float64{1, 2, 3, 4}, f: func(a float64) float64 { return a * a }, expected: []float64{1, 4, 9, 16}},
+		{s: []float64{1, 2, 3, 4}, f: func(a float64) float64 { return 2 * a }, expected: []float64{2, 4, 6, 8}},
+		{s: []float64{1, 2, 3, 4}, f: func(a float64) float64 { return a - 1 }, expected: []float64{0, 1, 2, 3}},
+	}
+
+	for i, test := range tests {
+		dst := make([]float64, len(test.s))
+		tmp := make([]float64, len(test.s))
+		copy(tmp, test.s)
+		ApplyTo(dst, test.s, test.f)
+		if !EqualApprox(dst, test.expected, 1e-6) {
+			t.Errorf("ApplyTo failed on test %d. Got %v expected %v", i, dst, test.expected)
+		}
+
+		// Check to make sure input slice not mutated
+		if !EqualApprox(tmp, test.s, 0) {
+			t.Error("Non-dst Input slice mutated in ApplyTo")
+		}
+	}
+}
+
 func RandomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {
