@@ -680,3 +680,58 @@ func Within(s []float64, v float64) int {
 	}
 	return -1
 }
+
+// Log returns the natural logarithm, element-wise, of the elements of s, and stores in dst.
+// Panics if the lengths of dst and s do not match.
+func Log(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of the slices do not match")
+	}
+	for i, val := range s {
+		dst[i] = math.Log(val)
+	}
+}
+
+// Exp returns the exponential base-e, element-wise, of the elements of s, and stores in dst.
+// Panics if the lengths of dst and s do not match.
+func Exp(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of the slices do not match")
+	}
+	for i, val := range s {
+		dst[i] = math.Exp(val)
+	}
+}
+
+// Sq returns the square, element-wise, of the elements of s, and stores in dst.
+// Panics if the lengths of dst and s do not match.
+func Sq(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of the slices do not match")
+	}
+	for i, val := range s {
+		dst[i] = val * val
+	}
+}
+
+// Sqrt returns the square root, element-wise, of the elements of s, and stores in dst.
+// Panics if the lengths of dst and s do not match.
+func Sqrt(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of the slices do not match")
+	}
+	for i, val := range s {
+		dst[i] = math.Sqrt(val)
+	}
+}
+
+// Abs returns the absolute value, element-wise, of the elements of s, and stores in dst.
+// Panics if the lengths of dst and s do not match.
+func Abs(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of the slices do not match")
+	}
+	for i, val := range s {
+		dst[i] = math.Abs(val)
+	}
+}

@@ -1078,6 +1078,164 @@ func TestWithin(t *testing.T) {
 
 }
 
+var vf = []float64{
+	4.9790119248836735e+00,
+	7.7388724745781045e+00,
+	-2.7688005719200159e-01,
+	-5.0106036182710749e+00,
+	9.6362937071984173e+00,
+	2.9263772392439646e+00,
+	5.2290834314593066e+00,
+	2.7279399104360102e+00,
+	1.8253080916808550e+00,
+	-8.6859247685756013e+00,
+}
+
+var abs = []float64{
+	4.9790119248836735e+00,
+	7.7388724745781045e+00,
+	2.7688005719200159e-01,
+	5.0106036182710749e+00,
+	9.6362937071984173e+00,
+	2.9263772392439646e+00,
+	5.2290834314593066e+00,
+	2.7279399104360102e+00,
+	1.8253080916808550e+00,
+	8.6859247685756013e+00,
+}
+
+var exp = []float64{
+	1.4533071302642137507696589e+02,
+	2.2958822575694449002537581e+03,
+	7.5814542574851666582042306e-01,
+	6.6668778421791005061482264e-03,
+	1.5310493273896033740861206e+04,
+	1.8659907517999328638667732e+01,
+	1.8662167355098714543942057e+02,
+	1.5301332413189378961665788e+01,
+	6.2047063430646876349125085e+00,
+	1.6894712385826521111610438e-04,
+}
+
+var log = []float64{
+	1.605231462693062999102599e+00,
+	2.0462560018708770653153909e+00,
+	-1.2841708730962657801275038e+00,
+	1.6115563905281545116286206e+00,
+	2.2655365644872016636317461e+00,
+	1.0737652208918379856272735e+00,
+	1.6542360106073546632707956e+00,
+	1.0035467127723465801264487e+00,
+	6.0174879014578057187016475e-01,
+	2.161703872847352815363655e+00,
+}
+
+var sqrt = []float64{
+	2.2313699659365484748756904e+00,
+	2.7818829009464263511285458e+00,
+	5.2619393496314796848143251e-01,
+	2.2384377628763938724244104e+00,
+	3.1042380236055381099288487e+00,
+	1.7106657298385224403917771e+00,
+	2.286718922705479046148059e+00,
+	1.6516476350711159636222979e+00,
+	1.3510396336454586262419247e+00,
+	2.9471892997524949215723329e+00,
+}
+
+func TestAbs(t *testing.T) {
+
+	n := len(vf)
+	dst := make([]float64, n, n)
+	Abs(dst, vf)
+	if !EqualApprox(dst, abs, EQTOLERANCE) {
+		t.Errorf("Abs doesn't give correct answer")
+	}
+	s1short := []float64{1, 2.3, 4.4}
+	if !Panics(func() { Abs(s1short, vf) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	if !Panics(func() { Abs(vf, s1short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
+func TestLog(t *testing.T) {
+
+	n := len(vf)
+	dst := make([]float64, n, n)
+	Abs(dst, vf)
+	Log(dst, dst)
+	t.Log(dst)
+	t.Log(log)
+	if !EqualApprox(dst, log, EQTOLERANCE) {
+		t.Errorf("Log doesn't give correct answer")
+	}
+	s1short := []float64{1, 2.3, 4.4}
+	if !Panics(func() { Log(s1short, vf) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	if !Panics(func() { Log(vf, s1short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
+func TestExp(t *testing.T) {
+
+	n := len(vf)
+	dst := make([]float64, n, n)
+	Exp(dst, vf)
+	if !EqualApprox(dst, exp, EQTOLERANCE) {
+		t.Errorf("Exp doesn't give correct answer")
+	}
+	s1short := []float64{1, 2.3, 4.4}
+	if !Panics(func() { Exp(s1short, vf) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	if !Panics(func() { Exp(vf, s1short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
+func TestSq(t *testing.T) {
+
+	n := len(vf)
+	dst := make([]float64, n, n)
+	expected := make([]float64, n, n)
+	MulTo(expected, vf, vf)
+	Sq(dst, vf)
+
+	if !EqualApprox(dst, expected, EQTOLERANCE) {
+		t.Errorf("Sq doesn't give correct answer")
+	}
+	s1short := []float64{1, 2.3, 4.4}
+	if !Panics(func() { Sq(s1short, vf) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	if !Panics(func() { Sq(vf, s1short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
+func TestSqrt(t *testing.T) {
+
+	n := len(vf)
+	dst := make([]float64, n, n)
+	Abs(dst, vf)
+	Sqrt(dst, dst)
+
+	if !EqualApprox(dst, sqrt, EQTOLERANCE) {
+		t.Errorf("Sqrt doesn't give correct answer")
+	}
+	s1short := []float64{1, 2.3, 4.4}
+	if !Panics(func() { Sqrt(s1short, vf) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	if !Panics(func() { Sqrt(vf, s1short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
 func RandomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {
