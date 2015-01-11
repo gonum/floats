@@ -14,6 +14,8 @@ import (
 	"errors"
 	"math"
 	"sort"
+
+	"github.com/gonum/internal/asm"
 )
 
 // Add adds, element-wise, the elements of s and dst, and stores in dst.
@@ -55,9 +57,7 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination and source to not match")
 	}
-	for i, val := range s {
-		dst[i] += alpha * val
-	}
+	asm.DaxpyUnitary(alpha, s, dst)
 }
 
 // AddScaledTo performs dst = y + alpha * s, where alpha is a scalar,
@@ -69,9 +69,8 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
 	}
-	for i, val := range s {
-		dst[i] = y[i] + alpha*val
-	}
+	copy(dst, y)
+	asm.DaxpyUnitary(alpha, s, dst)
 	return dst
 }
 
@@ -234,11 +233,7 @@ func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
 		panic("floats: lengths of the slices do not match")
 	}
-	var sum float64
-	for i, val := range s1 {
-		sum += val * s2[i]
-	}
-	return sum
+	return asm.DdotUnitary(s1, s2)
 }
 
 // Equal returns true if the slices have equal lengths and
@@ -435,7 +430,7 @@ func LogSumExp(s []float64) float64 {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
 	// First, find the maximum value in the slice.
-	maxval, _ := Max(s)
+	maxval := Max(s)
 	if math.IsInf(maxval, 0) {
 		// If it's infinity either way, the logsumexp will be infinity as well
 		// returning now avoids NaNs
@@ -450,30 +445,47 @@ func LogSumExp(s []float64) float64 {
 	return math.Log(lse) + maxval
 }
 
-// Max returns the maximum value in the slice and the location of
-// the maximum value. If the input slice is empty, Max will panic.
-func Max(s []float64) (max float64, ind int) {
-	max = s[0]
-	for i, val := range s {
-		if val > max {
-			max = val
-			ind = i
-		}
-	}
-	return max, ind
+// Max returns the maximum value in the input slice. If the slice is empty, Max will panic.
+func Max(s []float64) float64 {
+	return s[MaxIdx(s)]
 }
 
-// Min returns the minimum value in the slice and the index of
-// the minimum value. If the input slice is empty, Min will panic.
-func Min(s []float64) (min float64, ind int) {
-	min = s[0]
-	for i, val := range s {
-		if val < min {
-			min = val
+// MaxIdx returns the index of the maximum value in the input slice. If several
+// entries have the maximum value, the first such index is returned. If the slice
+// is empty, MaxIdx will panic.
+func MaxIdx(s []float64) int {
+	if len(s) == 0 {
+		panic("floats: zero slice length")
+	}
+	max := s[0]
+	var ind int
+	for i, v := range s {
+		if v > max {
+			max = v
 			ind = i
 		}
 	}
-	return min, ind
+	return ind
+}
+
+// Min returns the maximum value in the input slice. If the slice is empty, Min will panic.
+func Min(s []float64) float64 {
+	return s[MinIdx(s)]
+}
+
+// MinIdx returns the index of the minimum value in the input slice. If several
+// entries have the maximum value, the first such index is returned. If the slice
+// is empty, MinIdx will panic.
+func MinIdx(s []float64) int {
+	min := s[0]
+	var ind int
+	for i, v := range s {
+		if v < min {
+			min = v
+			ind = i
+		}
+	}
+	return ind
 }
 
 // Mul performs element-wise multiplication between dst
