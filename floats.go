@@ -389,6 +389,36 @@ func HasNaN(s []float64) bool {
 	return false
 }
 
+// IsDecreasing returns false if the slice s is not in decreasing order
+// and true otherwise. If strict is true then it additionally checks
+// that the order is strictly decreasing.
+func IsDecreasing(s []float64, strict bool) bool {
+	for i := range s {
+		if i == 0 {
+			continue
+		}
+		if s[i-1] < s[i] || strict && s[i-1] == s[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// IsIncreasing returns false if the slice s is not in increasing order
+// and true otherwise. If strict is true then it additionally checks
+// that the order is strictly increasing.
+func IsIncreasing(s []float64, strict bool) bool {
+	for i := range s {
+		if i == 0 {
+			continue
+		}
+		if s[i-1] > s[i] || strict && s[i-1] == s[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // LogSpan returns a set of n equally spaced points in log space between,
 // l and u where N is equal to len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.

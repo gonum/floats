@@ -614,6 +614,114 @@ func TestHasNaN(t *testing.T) {
 	}
 }
 
+func TestIsDecreasing(t *testing.T) {
+	for i, test := range []struct {
+		s      []float64
+		strict bool
+		ans    bool
+	}{
+		{
+			s:      []float64{1},
+			strict: false,
+			ans:    true,
+		},
+		{
+			s:      []float64{1},
+			strict: true,
+			ans:    true,
+		},
+		{
+			s:      []float64{4, 3, 2, 1},
+			strict: false,
+			ans:    true,
+		},
+		{
+			s:      []float64{4, 3, 2, 1},
+			strict: true,
+			ans:    true,
+		},
+		{
+			s:      []float64{4, 4, 3, 2, 1},
+			strict: false,
+			ans:    true,
+		},
+		{
+			s:      []float64{4, 4, 3, 2, 1},
+			strict: true,
+			ans:    false,
+		},
+		{
+			s:      []float64{4, 2, 3, 1},
+			strict: false,
+			ans:    false,
+		},
+		{
+			s:      []float64{4, 2, 3, 1},
+			strict: true,
+			ans:    false,
+		},
+	} {
+		b := IsDecreasing(test.s, test.strict)
+		if b != test.ans {
+			t.Errorf("IsDecreasing mismatch case %d. Expected %v, Found %v", i, test.ans, b)
+		}
+	}
+}
+
+func TestIsIncreasing(t *testing.T) {
+	for i, test := range []struct {
+		s      []float64
+		strict bool
+		ans    bool
+	}{
+		{
+			s:      []float64{1},
+			strict: false,
+			ans:    true,
+		},
+		{
+			s:      []float64{1},
+			strict: true,
+			ans:    true,
+		},
+		{
+			s:      []float64{1, 2, 3, 4},
+			strict: false,
+			ans:    true,
+		},
+		{
+			s:      []float64{1, 2, 3, 4},
+			strict: true,
+			ans:    true,
+		},
+		{
+			s:      []float64{1, 2, 3, 3, 4},
+			strict: false,
+			ans:    true,
+		},
+		{
+			s:      []float64{1, 2, 3, 3, 4},
+			strict: true,
+			ans:    false,
+		},
+		{
+			s:      []float64{1, 3, 2, 4},
+			strict: false,
+			ans:    false,
+		},
+		{
+			s:      []float64{1, 3, 2, 4},
+			strict: true,
+			ans:    false,
+		},
+	} {
+		b := IsIncreasing(test.s, test.strict)
+		if b != test.ans {
+			t.Errorf("IsIncreasing mismatch case %d. Expected %v, Found %v", i, test.ans, b)
+		}
+	}
+}
+
 func TestLogSpan(t *testing.T) {
 	receiver1 := make([]float64, 6)
 	truth := []float64{0.001, 0.01, 0.1, 1, 10, 100}
