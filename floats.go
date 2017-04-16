@@ -40,7 +40,7 @@ func AddTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
-// AddConst adds the scalar c to all of the values in dst.
+// AddConst adds the value c to all of the values in dst.
 func AddConst(c float64, dst []float64) {
 	for i := range dst {
 		dst[i] += c
@@ -760,4 +760,91 @@ func Within(s []float64, v float64) int {
 		}
 	}
 	return -1
+}
+
+// FoldsRight folds a function from the right into a single value by iteratively applying a function on an
+// accumulated value.
+//
+// Accum is the initial accumulator value.
+//
+// This is equivalent to iterating over the list from the right and doing
+//     accum = f(curr, accum)
+// at each step.
+func FoldRight(f func(float64, float64) float64, s []float64, accum float64) float64 {
+	for j := len(s) - 1; j >= 0; j-- {
+		accum = f(s[j], accum)
+	}
+
+	return accum
+}
+
+// FoldLeft folds a function from the left into a single value by iteratively applying a function on an
+// accumulated value.
+//
+// Accum is the initial accumulator value.
+//
+// This is equivalent to iterating over the list from the start and doing
+//     accum = f(accum, curr)
+// at each step.
+//
+// For instance, the last element of CumProd could be found with:
+//     FoldLeft(func(a,b float64) float64{ return a * b}, s, 1.0)
+//
+// Or the last element of CumSum:
+//     FoldLeft(func(a,b float64) float64{ return a + b}, s, 0.0)
+func FoldLeft(f func(float64, float64) float64, s []float64, accum float64) float64 {
+	for _, val := range s {
+		accum = f(accum, val)
+	}
+
+	return accum
+}
+
+// FilterTo applies a function to every element of s and places the first k elements
+// where that function returns true in dst.
+//
+// If k < 0, this will slice dst to 0 and append all
+// elements that return true. If k > 0, and fewer elements pass the test,
+// this will return an error.
+//
+// Useful for, for instance, filtering all the strictly negative numbers out of a slice.
+//
+// This is the same as Find, but it returns the actual elements instead of the indices
+func FilterTo(dst []float64, f func(float64) bool, s []float64, k int) ([]float64, error) {
+	if k == 0 {
+		return dst[:0], nil
+	}
+
+	var err error
+	// If dst is nil append still works,
+	// it just makes a new slice, but we can't
+	// downslice
+	if dst != nil {
+		dst = dst[:0]
+	}
+
+	if k < 0 {
+		for _, val := range s {
+			if f(val) {
+				dst = append(dst, val)
+			}
+		}
+	} else {
+		found := 0
+		for _, val := range s {
+			if found >= k {
+				break
+			}
+			if f(val) {
+				dst = append(dst, val)
+				found++
+			}
+		}
+
+		if found < k {
+			err = errors.New("floats: insufficient elements found")
+		}
+	}
+
+	return dst, err
 }

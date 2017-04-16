@@ -6,6 +6,7 @@ package floats
 
 import (
 	"fmt"
+	"math"
 )
 
 // Set of examples for all the functions
@@ -101,4 +102,88 @@ func ExampleCumSum() {
 	// Output:
 	// dst = [1 -1 2 -2]
 	// s = [1 -2 3 -4]
+}
+
+func ExampleFilter_simple() {
+	s := []float64{1, 3, 2, 5, 6}
+	f := func(a float64) bool {
+		return a > 3
+	}
+
+	dst, _ := FilterTo(nil, f, s, -1)
+
+	fmt.Println("dst =", dst)
+	fmt.Println("s =", s)
+	// Output:
+	// dst = [5 6]
+	// s = [1 3 2 5 6]
+}
+
+func ExampleFilter_subsequence() {
+	// Let's use state magic to filter elements
+	// so the resulting list is a strictly increasing
+	// subsequence!
+
+	max := math.Inf(-1)
+	s := []float64{1, 3, 2, 6, 5}
+	f := func(a float64) bool {
+		if a > max {
+			max = a
+			return true
+		}
+
+		return false
+	}
+
+	dst, _ := FilterTo(nil, f, s, -1)
+
+	fmt.Println("dst =", dst)
+	fmt.Println("s =", s)
+	// Output:
+	// dst = [1 3 6]
+	// s = [1 3 2 6 5]
+}
+
+func ExampleFoldRight() {
+	s := []float64{9, -2, 21, 4}
+	f := func(a, b float64) float64 {
+		if a < b {
+			return a * b
+		}
+
+		return a - b
+	}
+	initial := 5.0
+
+	val := FoldRight(f, s, initial)
+
+	fmt.Println("val =", val)
+	fmt.Println("initial =", initial)
+	fmt.Println("s =", s)
+	// Output:
+	// val = 11
+	// initial = 5
+	// s = [9 -2 21 4]
+}
+
+func ExampleFoldLeft() {
+	s := []float64{9, -2, 21, 4}
+	f := func(a, b float64) float64 {
+		if a < b {
+			return a * b
+		}
+
+		return a - b
+	}
+	initial := 5.0
+
+	val := FoldLeft(f, s, initial)
+
+	fmt.Println("val =", val)
+	fmt.Println("initial =", initial)
+	fmt.Println("s =", s)
+	// Output:
+	// val = 22
+	// initial = 5
+	// s = [9 -2 21 4]
 }
